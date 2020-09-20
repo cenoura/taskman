@@ -1,0 +1,8 @@
+App\TaskMan\Application\Query\Task\DTO\TaskDTO:
+  attributes:
+    id:
+      groups: ['task_view']
+    title:
+      groups: ['task_view']
+    executionDate:
+      groups: ['task_view']
