@@ -14,18 +14,36 @@ services:
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
-        resource: '../src/'
+        resource: '../src/*'
         exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
             - '../src/Kernel.php'
             - '../src/Tests/'
+            - '../src/Shared/Infrastructure/Persistence/Migrations'
 
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: '../src/Controller/'
+    App\TaskMan\UI\Rest\:
+        resource: '../src/TaskMan/UI/Rest'
         tags: ['controller.service_arguments']
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    command_handlers:
+        namespace: App\TaskMan\Application\Command\
+        resource: '../src/TaskMan/Application/Command/*/*/*CommandHandler.php'
+        autoconfigure: false
+        tags:
+            - { name: messenger.message_handler, bus: command_bus }
+
+    query_handlers:
+        namespace: App\TaskMan\Application\Query\
+        resource: '../src/TaskMan/Application/Query/*/*/*QueryHandler.php'
+        autoconfigure: false
+        tags:
+            - { name: messenger.message_handler, bus: query_bus }
+
+    event_handlers:
+        namespace: App\TaskMan\Application\
+        resource: '../src/TaskMan/Application/**/*EventHandler.php'
+        autoconfigure: false
+        tags:
+            - { name: messenger.message_handler, bus: event_bus }
+
+    App\Shared\Infrastructure\Persistence\Doctrine\DomainEventSubscriber:
+        tags: [ { name: 'doctrine.event_subscriber' } ]
